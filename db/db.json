@@ -78,6 +78,28 @@
     }
   ],
   "burgers": [
+    {
+      "nome": "Jose",
+      "carne": "Maminha",
+      "pao": "3 Queijos",
+      "opcionais": [
+        "Bacon",
+        "Pepino"
+      ],
+      "status": "Finalizado",
+      "id": 2
+    },
+    {
+      "nome": "Adao",
+      "carne": "Alcatra",
+      "pao": "Italiano Branco",
+      "opcionais": [
+        "Cheddar",
+        "Tomate",
+        "Cebola roxa"
+      ],
+      "status": "Finalizado",
+      "id": 5
+    }
   ]
 }
-

@@ -1,7 +1,8 @@
 <template>
     <div>
         <div>
-            <form id="burger-form">
+            <Message :msg="msg" v-show="msg"/>
+            <form id="burger-form" @submit.prevent="createBurger()">
                 <div class="input-container">
                     <label for="nome">Nome do cliente</label>
                     <input type="text" name="nome" id="nome" v-model="nome" placeholder="Digite seu nome">
@@ -9,22 +10,25 @@
                 <div class="input-container">
                     <label for="pao">Escolha o pão</label>
                     <select name="pao" id="pao" v-model="pao" >
-                        <option value="">Selecione seu pão: </option>
-                        <option value="integral">Integral</option>
+                        <option v-for="pao in jpaes" :key="pao.id" :value="pao.tipo">
+                        {{ pao.tipo }}
+                        </option>
                     </select>
                 </div>
                 <div class="input-container">
                     <label for="carne">Escolha a carne do seu Burger:</label>
                     <select name="carne" id="carne" v-model="carne" >
-                        <option value="">Selecione sua carne: </option>
-                        <option value="alcatra">Alcatra</option>
+                        
+                        <option v-for="carne in jcarnes" :key="carne.id" :value="carne.tipo">
+                        {{ carne.tipo }}
+                        </option>
                     </select>
                 </div>
                 <div class="input-container" id="opcionais-container">
                     <label id="opcionais-title" for="opcionais">Selecione os opcionais:</label>
-                   <div class="checkbox-container">
-                    <input type="checkbox" name="opcionais" v-model="opcionais" value="Salame" id="">
-                    <span>Salame</span>
+                   <div class="checkbox-container"  v-for="op in jopcionais" :key="op.id">
+                    <input type="checkbox" name="opcionais"  v-model="opcionais" :value="op.tipo" >
+                    <span>{{ op.tipo }}</span>
                    </div>
                 </div>
                 <div class="input-container">
@@ -32,13 +36,93 @@
                 </div>
 
             </form>
+            
         </div>
     </div>
 </template>
 
 <script>
+import Message from "./Message.vue";
 export default {
-    name: "BurgerForm"
+    name: "BurgerForm",
+    data(){
+        return {
+            jpaes:null,
+            jcarnes:null,
+            jopcionais: null,
+            nome: null,
+            pao:null,
+            carne: null,
+            opcionais:[],
+            msg:null
+        }
+    },
+    computed:{
+        nome_pao(){
+            return `${this.nome} ${this.pao}`
+        }
+    },
+    methods:{
+        async getIngredientes(){
+            
+            console.log("Abriu metodo.")
+            //
+            const req = await fetch("http://localhost:3000/ingredientes");
+            const data = await req.json();
+
+            //
+            this.jpaes = data.paes;
+            this .jcarnes = data.carnes;
+            this.jopcionais = data.opcionais;
+            console.log("Carregou ingredientes.")
+     
+        },
+        async createBurger(){
+           
+            const dataBurger = {
+                nome: this.nome,
+                carne: this.carne,
+                pao: this.pao,
+                opcionais: Array.from(this.opcionais),
+                status: "Solicitado"
+            }
+            console.log("criou hamburger:");
+            console.log(dataBurger);
+           
+            const burgerJson = JSON.stringify(dataBurger);
+
+            const req = await fetch("http://localhost:3000/burgers", {
+                method: "POST",
+                headers:{"Content-Type": "application/json"},
+                body: burgerJson
+            });
+
+            const res = await req.json();
+            console.log("Mandou para o server:");
+            console.log(res);
+
+            
+            this.limparCampos();
+
+            this.msg= `Pedido N° ${res.id} realizado com sucesso`;
+
+            setTimeout(()=> this.msg="", 5000);
+
+        },
+         async limparCampos(){
+            this.nome = "";
+            this.carne = "";
+            this.pao = "";
+            this.opcionais=[];
+
+         }
+    },
+    mounted(){
+        this.getIngredientes()
+    },
+    components:{
+        Message
+    }
 }
 </script>
 
